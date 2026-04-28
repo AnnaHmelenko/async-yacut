@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request, url_for
 from yacut import db
 from yacut.models import URLMap
-from yacut.exceptions import BadRequestError, NotFoundError
 from yacut.utils import get_unique_short_id, is_valid_short_id
+from yacut.exceptions import BadRequestError, NotFoundError
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -12,14 +12,10 @@ def create_short_link():
     data = request.get_json(silent=True)
 
     if not data:
-        return jsonify(
-            {'message': 'Отсутствует тело запроса'}
-        ), 400
+        return jsonify({'message': 'Отсутствует тело запроса'}), 400
 
     if 'url' not in data:
-        return jsonify(
-            {'message': '"url" является обязательным полем!'}
-        ), 400
+        return jsonify({'message': '"url" является обязательным полем!'}), 400
 
     custom_id = data.get('custom_id')
 
@@ -27,14 +23,14 @@ def create_short_link():
         if custom_id:
             if not is_valid_short_id(custom_id):
                 return jsonify(
-                    {'message': 'Указано недопустимое имя для короткой ссылки'}
-                ), 400
+                    {'message': 'Указано недопустимое имя для короткой ссылки'
+                     }), 400
 
             if URLMap.query.filter_by(short=custom_id).first():
                 return jsonify(
-                    {'message': ''
-                        'Предложенный вариант короткой ссылки уже существует.'}
-                ), 400
+                    {'message':
+                        'Предложенный вариант короткой ссылки уже существует.'
+                     }), 400
         else:
             custom_id = get_unique_short_id()
 

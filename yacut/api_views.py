@@ -1,9 +1,8 @@
 from flask import Blueprint, jsonify, request, url_for
-from yacut import db
+
 from yacut.models import URLMap
 from yacut.utils import get_unique_short_id, is_valid_short_id
 from yacut.exceptions import BadRequestError, NotFoundError
-from yacut.constants import MAX_CUSTOM_ID_LENGTH
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')

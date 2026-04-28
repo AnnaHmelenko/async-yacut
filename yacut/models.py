@@ -19,10 +19,12 @@ class URLMap(db.Model):
         """
         if custom_id:
             if not URLMap.is_valid_short_id(custom_id):
-                raise BadRequestError('Указано недопустимое имя для короткой ссылки')
+                raise BadRequestError(
+                    'Указано недопустимое имя для короткой ссылки')
 
             if URLMap.query.filter_by(short=custom_id).first():
-                raise BadRequestError('Предложенный вариант короткой ссылки уже существует.')
+                raise BadRequestError(
+                    'Предложенный вариант короткой ссылки уже существует.')
         else:
             custom_id = URLMap.get_unique_short_id()
 
@@ -61,4 +63,5 @@ class URLMap(db.Model):
         """
         Проверяет, является ли short_id валидным.
         """
-        return len(short_id) <= MAX_CUSTOM_ID_LENGTH and all(symbol in SYMBOLS for symbol in short_id)
+        return len(short_id) <= MAX_CUSTOM_ID_LENGTH and all(
+            symbol in SYMBOLS for symbol in short_id)

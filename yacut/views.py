@@ -3,8 +3,8 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from yacut import db
 from yacut.forms import FileUploadForm, URLForm
 from yacut.models import URLMap
-from yacut.utils import get_unique_short_id, is_valid_short_id
 from yacut.yandex_disk import upload_file_and_get_download_link
+from yacut.exceptions import BadRequestError
 
 
 bp = Blueprint('views', __name__)
@@ -18,31 +18,23 @@ def index_view():
         original = form.original_link.data
         custom_id = form.custom_id.data
 
-        if custom_id:
-            if not is_valid_short_id(custom_id):
-                flash('Указано недопустимое имя для короткой ссылки')
-                return render_template('index.html', form=form)
+        # Проверка на зарезервированное имя 'files'
+        if custom_id and custom_id == 'files':
+            flash('Предложенный вариант короткой ссылки уже существует.')
+            return render_template('index.html', form=form)
 
-            if custom_id == 'files' or URLMap.query.filter_by(
-                    short=custom_id).first():
-                flash('Предложенный вариант короткой ссылки уже существует.')
-                return render_template('index.html', form=form)
-
-            short = custom_id
-        else:
-            short = get_unique_short_id()
-
-        url_map = URLMap(
-            original=original,
-            short=short,
-        )
-
-        db.session.add(url_map)
-        db.session.commit()
+        try:
+            url_map = URLMap.create_short_link(
+                original=original,
+                custom_id=custom_id if custom_id else None
+            )
+        except BadRequestError as e:
+            flash(str(e))
+            return render_template('index.html', form=form)
 
         short_link = url_for(
             'views.redirect_view',
-            short_id=short,
+            short_id=url_map.short,
             _external=True
         )
 
@@ -65,19 +57,19 @@ async def files_view():
 
         for file in files:
             download_link = await upload_file_and_get_download_link(file)
-            short = get_unique_short_id()
 
-            url_map = URLMap(
-                original=download_link,
-                short=short,
-            )
-
-            db.session.add(url_map)
-            db.session.commit()
+            try:
+                url_map = URLMap.create_short_link(
+                    original=download_link,
+                    custom_id=None
+                )
+            except BadRequestError as e:
+                flash(str(e))
+                continue
 
             short_link = url_for(
                 'views.redirect_view',
-                short_id=short,
+                short_id=url_map.short,
                 _external=True
             )
 

@@ -1,13 +1,16 @@
 from datetime import datetime
+from random import choices
+
 from yacut import db
-from yacut.exceptions import BadRequestError
 from yacut.constants import SHORT_ID_LENGTH, MAX_CUSTOM_ID_LENGTH, SYMBOLS
+from yacut.exceptions import BadRequestError
 
 
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.Text, nullable=False)
-    short = db.Column(db.String(16), unique=True, nullable=False, index=True)
+    short = db.Column(db.String(
+        MAX_CUSTOM_ID_LENGTH), unique=True, nullable=False, index=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     @staticmethod
@@ -18,6 +21,10 @@ class URLMap(db.Model):
         - Если custom_id не указан, генерируем уникальный
         """
         if custom_id:
+            if custom_id == 'files':
+                raise BadRequestError(
+                    'Предложенный вариант короткой ссылки уже существует.')
+
             if not URLMap.is_valid_short_id(custom_id):
                 raise BadRequestError(
                     'Указано недопустимое имя для короткой ссылки')
@@ -50,8 +57,6 @@ class URLMap(db.Model):
         """
         Генерирует уникальный короткий ID.
         """
-        from random import choices
-
         while True:
             short_id = ''.join(choices(SYMBOLS, k=SHORT_ID_LENGTH))
 

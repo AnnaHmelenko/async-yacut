@@ -1,4 +1,4 @@
-from flask import jsonify, current_app
+from flask import jsonify
 
 
 class APIError(Exception):

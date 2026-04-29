@@ -1,6 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from yacut import db
 from yacut.forms import FileUploadForm, URLForm
 from yacut.models import URLMap
 from yacut.yandex_disk import upload_file_and_get_download_link
@@ -18,7 +17,6 @@ def index_view():
         original = form.original_link.data
         custom_id = form.custom_id.data
 
-        # Проверка на зарезервированное имя 'files'
         if custom_id and custom_id == 'files':
             flash('Предложенный вариант короткой ссылки уже существует.')
             return render_template('index.html', form=form)

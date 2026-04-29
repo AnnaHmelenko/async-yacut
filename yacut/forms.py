@@ -20,8 +20,10 @@ class URLForm(FlaskForm):
             Optional(),
             Length(
                 max=MAX_CUSTOM_ID_LENGTH,
-                message=f'Короткая ссылка не должна превышать {
-                    MAX_CUSTOM_ID_LENGTH} символов'
+                message=(
+                    f'Короткая ссылка не должна превышать '
+                    f'{MAX_CUSTOM_ID_LENGTH} символов'
+                )
             )
         ]
     )

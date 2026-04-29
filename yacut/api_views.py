@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, url_for
 
 from yacut.models import URLMap
-from yacut.exceptions import BadRequestError, APIError
+from yacut.exceptions import APIError
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')

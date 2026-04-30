@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, url_for
 
 from yacut.models import URLMap
-from yacut.exceptions import APIError
+from yacut.exceptions import APIError, BadRequestError
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')
@@ -19,10 +19,13 @@ def create_short_link():
 
     custom_id = data.get('custom_id')
 
-    url_map = URLMap.create_short_link(
-        original=data['url'],
-        custom_id=custom_id
-    )
+    try:
+        url_map = URLMap.create_short_link(
+            original=data['url'],
+            custom_id=custom_id
+        )
+    except BadRequestError as e:
+        raise APIError(str(e), 400)
 
     return jsonify({
         'url': url_map.original,
